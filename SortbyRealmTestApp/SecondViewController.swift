@@ -10,7 +10,7 @@ import RealmSwift
 
 class SecondViewController: UIViewController {
     let realm = try! Realm()
-    var list: List<Item>!
+    
     
     @IBOutlet weak var textField: UITextField!
     
@@ -22,9 +22,12 @@ class SecondViewController: UIViewController {
         super.viewDidLoad()
         textField.delegate = self
         textField.becomeFirstResponder()
-        list = realm.objects(ItemList.self).first?.list
+        
+        
     }
     func saveData() {
+        var list: List<Item>!
+        list = realm.objects(ItemList.self).first?.list
         let item = Item()
         item.title = textField.text!
         try! realm.write() {
@@ -36,8 +39,9 @@ class SecondViewController: UIViewController {
             } else {
                 list.append(item)
             }
-        }        
-    }
+        }
+   }
+        
 }
 extension SecondViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

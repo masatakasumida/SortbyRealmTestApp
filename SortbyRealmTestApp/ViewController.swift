@@ -7,33 +7,102 @@
 
 import UIKit
 import RealmSwift
+import os
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    var datePicker: UIDatePicker = UIDatePicker()
+    var textField = UITextField()
+    var count:Int = 0
+    
+    @IBOutlet weak var tableView: UITableView!
+    let realm = try! Realm()
+    var list: List<Item>!
+    var indexPathNum = 0
+    
+    @IBAction func timerSetButton(_ sender: Any) {
+        os_log("stoplocalNotfication")
+        
+        // 通知の削除
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["Time Interval"])
+        
+        let ac = UIAlertController(title: "時間の設定", message: "設定した時間にチェックが付いていないと通知します!!", preferredStyle: .alert)
+        let ok = UIAlertAction(title: "セット", style: .destructive) { (action) in
+            self.count = Int(self.datePicker.countDownDuration)
+            print("カウントは\(self.count)です")
+            
+            os_log("setlocalNotfication")
+            
+            // notification's payload の設定
+            let content = UNMutableNotificationContent()
+            content.title = "チェックが付いていないタスク"
+            content.subtitle = "タスクは完了しましたか？"
+            content.body = ""
+            content.sound = UNNotificationSound.default
+            
+            // １回だけ
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(self.count), repeats: false)
+            let request = UNNotificationRequest(identifier: "Time Interval",
+                                                content: content,
+                                                trigger: trigger)
+            // 通知の登録
+            UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+            print(self.textField.text!)
+        }
+        let cancel = UIAlertAction(title: "キャンセル", style: .default) { (action) in
+            print("キャンセルされました")
+        }
+        ac.addTextField { (textField) in
+            // 決定バーの生成
+            let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: self.view.frame.size.width, height: 35))
+            let spacelItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+            let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.done))
+            toolbar.setItems([spacelItem, doneItem], animated: true)
+            textField.inputView = self.datePicker
+            textField.inputAccessoryView = toolbar
+            self.textField = textField
+            
+            // ピッカー設定
+            self.datePicker.datePickerMode = UIDatePicker.Mode.countDownTimer
+        }
+        ac.addAction(cancel)
+        ac.addAction(ok)
+        self.present(ac, animated: true, completion: nil)
+    }
     
     @IBAction func toSecondViewButton(_ sender: Any) {
         let secondVC = storyboard?.instantiateViewController(identifier: "secondView") as! SecondViewController
         navigationController?.pushViewController(secondVC,animated: true)
     }
-    @IBOutlet weak var tableView: UITableView!
-    let realm = try! Realm()
-    var list: List<Item>!
+  
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
-        print(Realm.Configuration.defaultConfiguration.fileURL!)
-      
-        navigationItem.rightBarButtonItems = [editButtonItem]
+        tableView.isEditing = true
+        tableView.allowsMultipleSelectionDuringEditing = true
+        super.viewDidLoad()
+        let center = UNUserNotificationCenter.current()
+        // 通知の使用許可をリクエスト
+        center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
+            
+            print(Realm.Configuration.defaultConfiguration.fileURL!)
+            
+        }
+    }
+    @objc func done() {
+        textField.endEditing(true)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "H時間m分後"
+        let time = formatter.string(from: datePicker.date)
+        
+        textField.text = time
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        list = realm.objects(ItemList.self).first?.list
         tableView.reloadData()
-    }
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        tableView.setEditing(editing, animated: animated)
-        tableView.isEditing = editing
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -41,14 +110,25 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        indexPathNum = indexPath.row
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        
         cell.textLabel?.text = list[indexPath.row].title
+        
+        if list[indexPath.row].checkMark == true {
+            tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+            let attributeString =  NSMutableAttributedString(string: list[indexPath.row].title)
+            attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSMakeRange(0, attributeString.length))
+            cell.textLabel?.attributedText = attributeString
+        }else {
+            tableView.deselectRow(at: indexPath, animated: false)
+        }
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-
+            
             try! realm.write {
                 let item = list[indexPath.row]
                 realm.delete(item)
@@ -65,7 +145,30 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        return true
+//    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+//        return true
+//    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let cell = tableView.cellForRow(at: indexPath) {
+            let attributeString =  NSMutableAttributedString(string: list[indexPath.row].title)
+            attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSMakeRange(0, attributeString.length))
+            cell.textLabel?.attributedText = attributeString
+            
+        }
+        try! realm.write {
+            list[indexPath.row].checkMark = true
+        }
+        print("セルを選択したよ")
+    }
+    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        if let cell = tableView.cellForRow(at: indexPath) {
+            let attributeString =  NSMutableAttributedString(string: list[indexPath.row].title)
+            attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 0, range: NSMakeRange(0, attributeString.length))
+            cell.textLabel?.attributedText = attributeString
+            try! realm.write {
+                list[indexPath.row].checkMark = false
+            }
+        }
     }
 }

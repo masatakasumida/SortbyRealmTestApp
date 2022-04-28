@@ -8,10 +8,12 @@
 import UIKit
 import RealmSwift
 
-class Item: Object {
-    @objc dynamic var title: String = ""
-}
-
 class ItemList: Object {
     let list = List<Item>()
+}
+
+class Item: Object {
+    @objc dynamic var title: String = ""
+    
+    @objc dynamic var checkMark: Bool = false
 }

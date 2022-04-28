@@ -60,6 +60,22 @@
                                     <action selector="toSecondViewButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9ZH-ih-4rO"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kg9-8v-5PV">
+                                <rect key="frame" x="33" y="773" width="56" height="56"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="timer" catalog="system" imagePadding="1" cornerStyle="capsule">
+                                    <backgroundConfiguration key="background">
+                                        <color key="backgroundColor" systemColor="linkColor"/>
+                                    </backgroundConfiguration>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="font">
+                                        <fontDescription key="fontDescription" type="italicSystem" pointSize="35"/>
+                                    </preferredSymbolConfiguration>
+                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="timerSetButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="bfZ-tZ-zxg"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -67,9 +83,11 @@
                             <constraint firstItem="6aJ-ro-P00" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="4bf-mS-s2x"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="6aJ-ro-P00" secondAttribute="bottom" id="E0Y-T6-f9e"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="8cr-2j-9k1" secondAttribute="trailing" constant="33" id="FV5-Kj-Iap"/>
+                            <constraint firstItem="kg9-8v-5PV" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="33" id="aJX-AJ-uDB"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="6aJ-ro-P00" secondAttribute="trailing" id="bB9-mT-gaf"/>
                             <constraint firstItem="6aJ-ro-P00" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="cQ2-7b-jzs"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="8cr-2j-9k1" secondAttribute="bottom" constant="33" id="ebX-HP-9li"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="kg9-8v-5PV" secondAttribute="bottom" constant="33" id="sJv-49-c6A"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="gR4-Gq-nZo"/>
@@ -133,6 +151,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="timer" catalog="system" width="128" height="121"/>
         <systemColor name="linkColor">
             <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
