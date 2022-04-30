@@ -15,10 +15,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     var textField = UITextField()
     var count:Int = 0
     
+    
     @IBOutlet weak var tableView: UITableView!
+    
     let realm = try! Realm()
     var list: List<Item>!
-    var indexPathNum = 0
+    
     
     @IBAction func timerSetButton(_ sender: Any) {
         os_log("stoplocalNotfication")
@@ -35,9 +37,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
             // notification's payload の設定
             let content = UNMutableNotificationContent()
-            content.title = "チェックが付いていないタスク"
-            content.subtitle = "タスクは完了しましたか？"
-            content.body = ""
+            content.title = "タスクが全て達成されていません!!"
+            content.subtitle = ""
+            content.body = "タスクを達成しましょう!!"
             content.sound = UNNotificationSound.default
             
             // １回だけ
@@ -47,7 +49,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                                                 trigger: trigger)
             // 通知の登録
             UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-            print(self.textField.text!)
         }
         let cancel = UIAlertAction(title: "キャンセル", style: .default) { (action) in
             print("キャンセルされました")
@@ -55,9 +56,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         ac.addTextField { (textField) in
             // 決定バーの生成
             let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: self.view.frame.size.width, height: 35))
-            let spacelItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+            let spaceItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
             let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.done))
-            toolbar.setItems([spacelItem, doneItem], animated: true)
+            toolbar.setItems([spaceItem, doneItem], animated: true)
             textField.inputView = self.datePicker
             textField.inputAccessoryView = toolbar
             self.textField = textField
@@ -74,7 +75,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let secondVC = storyboard?.instantiateViewController(identifier: "secondView") as! SecondViewController
         navigationController?.pushViewController(secondVC,animated: true)
     }
-  
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,7 +111,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        indexPathNum = indexPath.row
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
         
         cell.textLabel?.text = list[indexPath.row].title
@@ -145,9 +146,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-//    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-//        return true
-//    }
+    //    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+    //        return true
+    //    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if let cell = tableView.cellForRow(at: indexPath) {
@@ -159,7 +160,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         try! realm.write {
             list[indexPath.row].checkMark = true
         }
-        print("セルを選択したよ")
     }
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         if let cell = tableView.cellForRow(at: indexPath) {
